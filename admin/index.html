@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0c0a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Science+Gothic:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../shared/supabase-client.js"></script>
+  <script src="../shared/audio-store.js"></script>
+  <script src="admin.js" defer></script>
+  <title>Tafazzi — Audio Manager</title>
+</head>
+<body>
+  <section id="login-view" class="login-view">
+    <div class="login-box">
+      <div class="brand"><span class="brand-mark">T</span><span>TAFAZZI</span></div>
+      <div class="login-copy">
+        <span class="eyebrow">Area riservata</span>
+        <h1>Audio<br>Manager.</h1>
+        <p>Accedi con l'account amministratore Supabase per inserire, ascoltare o cancellare gli audio disponibili nel frontend.</p>
+      </div>
+      <form id="login-form" class="stack">
+        <label>Email<input id="email" type="email" autocomplete="username" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+        <p id="login-error" class="message error hidden"></p>
+        <button class="primary" type="submit">ACCEDI</button>
+      </form>
+    </div>
+  </section>
+
+  <main id="admin-view" class="admin-layout hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">T</span><span>TAFAZZI</span></div>
+      <nav>
+        <button class="side-link active" type="button">Libreria audio</button>
+        <a class="side-link" href="../index.html" target="_blank" rel="noopener">Apri frontend ↗</a>
+      </nav>
+      <button id="logout" class="logout" type="button">Esci</button>
+    </aside>
+
+    <section class="content">
+      <header class="page-head">
+        <div>
+          <span class="eyebrow">Gestionale Supabase</span>
+          <h1>Libreria audio</h1>
+          <p>Gli audio vengono salvati nello Storage Supabase e sono subito disponibili nel frontend pubblicato su GitHub Pages.</p>
+        </div>
+        <div class="counter"><strong id="total-count">0</strong><span>audio attivi</span></div>
+      </header>
+
+      <section class="card upload-card">
+        <div class="card-head">
+          <div><span class="eyebrow">Nuovo contenuto</span><h2>Inserisci audio</h2></div>
+        </div>
+        <form id="upload-form" class="upload-grid">
+          <label class="file-drop">
+            <input id="audio-file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/aac,.mp3,.wav,.ogg,.m4a,.aac" required>
+            <span class="upload-icon">＋</span>
+            <span><strong id="file-label">Scegli un file audio</strong><small>MP3, WAV, OGG, M4A o AAC · max 30 MB</small></span>
+          </label>
+          <label>Nome visualizzato<input id="audio-name" placeholder="Es. Coffee break" required maxlength="80"></label>
+          <label>Categoria
+            <select id="audio-safety">
+              <option value="safe">SAFE</option>
+              <option value="unsafe">NOT SAFE</option>
+            </select>
+          </label>
+          <label>Scorciatoia <input id="audio-key" maxlength="1" placeholder="Opzionale"></label>
+          <div class="submit-row">
+            <p id="upload-message" class="message hidden"></p>
+            <button id="upload-submit" class="primary" type="submit">CARICA AUDIO</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card library-card">
+        <div class="library-tools">
+          <div><span class="eyebrow">Archivio</span><h2>Audio disponibili</h2></div>
+          <div class="filters">
+            <input id="search" type="search" placeholder="Cerca audio...">
+            <select id="filter">
+              <option value="all">Tutti</option>
+              <option value="safe">SAFE</option>
+              <option value="unsafe">NOT SAFE</option>
+            </select>
+          </div>
+        </div>
+        <div id="audio-list" class="audio-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog" class="dialog-card">
+      <span class="eyebrow">Conferma</span>
+      <h2>Eliminare questo audio?</h2>
+      <p id="confirm-copy"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Annulla</button>
+        <button id="confirm-delete" value="default" class="danger">Elimina</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
