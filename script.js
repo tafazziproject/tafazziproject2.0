@@ -4,220 +4,803 @@ let allMp3Files = [];
 let currentAudio = null;
 let currentFile = null;
 let messageTimeout = null;
-let currentMode = "safe";
+
+// Home e Library hanno stati separati: i filtri della Library non toccano
+// mai le categorie abilitate per la riproduzione casuale nella Home.
+const homePlayback = {
+  safe: true,
+  unsafe: false
+};
+
+let libraryMode = "safe";
 
 const button = document.querySelector("#playButton");
-const labelSwitch = document.querySelector("#switch-label");
+const playButtonText = document.querySelector("#play-button-text");
+const pulseStage = document.querySelector("#pulse-stage");
+const playStatus = document.querySelector("#play-status");
+
 const audioList = document.querySelector("#audio-list");
+
 const homeScreen = document.querySelector("#home-screen");
 const libraryScreen = document.querySelector("#library-screen");
+
 const homeTab = document.querySelector("#home-tab");
 const libraryTab = document.querySelector("#library-tab");
+
 const safeTab = document.querySelector("#safe-tab");
 const nsfwTab = document.querySelector("#nsfw-tab");
 const allTab = document.querySelector("#all-tab");
+
 const librarySearch = document.querySelector("#library-search");
 const libraryCount = document.querySelector("#library-count");
-const settingsButton = document.querySelector("#settings-button");
-const settingsPanel = document.querySelector("#settings-panel");
-const settingsBackdrop = document.querySelector("#settings-backdrop");
-const homeModeLabel = document.querySelector("#home-mode-label");
-const modeDot = document.querySelector("#mode-dot");
-const recentCard = document.querySelector("#recent-card");
-const recentName = document.querySelector("#recent-name");
-const recentState = document.querySelector("#recent-state");
-const playLabel = document.querySelector("#play-label");
-const modeSwitch = document.querySelector("#mode-switch");
-const modeDescription = document.querySelector("#mode-description");
+
+const homeSafeSwitch = document.querySelector("#home-safe-switch");
+const homeUnsafeSwitch = document.querySelector("#home-unsafe-switch");
+
 
 function randomIndex(length) {
-  if (!Number.isInteger(length) || length <= 0) throw new RangeError("Lunghezza non valida.");
+  if (!Number.isInteger(length) || length <= 0) {
+    throw new RangeError("Lunghezza non valida.");
+  }
+
   if (globalThis.crypto?.getRandomValues) {
     const values = new Uint32Array(1);
     const range = 0x100000000;
     const limit = Math.floor(range / length) * length;
-    do crypto.getRandomValues(values); while (values[0] >= limit);
+
+    do {
+      crypto.getRandomValues(values);
+    } while (values[0] >= limit);
+
     return values[0] % length;
   }
+
   return Math.floor(Math.random() * length);
 }
 
+
 async function refreshAudioLibrary() {
   if (!window.TafazziStore) {
-    showTemporaryMessage("Archivio audio non disponibile");
+    showTemporaryMessage("ARCHIVIO AUDIO NON DISPONIBILE");
     return;
   }
-  allMp3Files = await window.TafazziStore.getLibrary();
-  renderAudioList();
+
+  try {
+    allMp3Files = await window.TafazziStore.getLibrary();
+    renderAudioList();
+  } catch (error) {
+    console.error(error);
+    showTemporaryMessage("ERRORE NEL CARICAMENTO AUDIO");
+  }
 }
 
-function showTemporaryMessage(message, duration = 3000) {
+
+function showTemporaryMessage(message, duration = 2600) {
   window.clearTimeout(messageTimeout);
-  playLabel.textContent = message;
+
+  if (!playStatus) return;
+
+  playStatus.textContent = message;
+
   messageTimeout = window.setTimeout(() => {
-    playLabel.textContent = "Tap to Tafazzi";
+    playStatus.textContent = "";
   }, duration);
 }
 
+
+function isAudioPlaying() {
+  return Boolean(
+    currentAudio &&
+    !currentAudio.paused &&
+    !currentAudio.ended
+  );
+}
+
+
+function syncMainPlayButton() {
+  const playing = isAudioPlaying();
+
+  if (button) {
+    button.classList.toggle("is-playing", playing);
+    button.setAttribute("aria-pressed", String(playing));
+    button.setAttribute(
+      "aria-label",
+      playing ? "Ferma audio" : "Riproduci un audio casuale"
+    );
+  }
+
+  if (pulseStage) {
+    pulseStage.classList.toggle("is-playing", playing);
+  }
+
+  if (playButtonText) {
+    playButtonText.textContent = playing ? "STOP" : "PLAY";
+  }
+}
+
+
 function updatePlayingItem() {
+  const playing = isAudioPlaying();
+
   document.querySelectorAll(".audio-item").forEach(item => {
-    item.classList.toggle("playing-item", item.dataset.path === currentFile?.path && !currentAudio?.paused);
+    const isCurrent =
+      playing &&
+      item.dataset.path === currentFile?.path;
+
+    item.classList.toggle("playing-item", isCurrent);
   });
 }
 
-function playAudio(file, audioData = allMp3Files.find(item => item.path === file)) {
-  currentAudio?.pause();
-  currentFile = audioData || { path: file, name: file.split("/").pop() };
-  currentAudio = new Audio(file);
-  currentAudio.addEventListener("ended", () => {
-    button.classList.remove("playing");
-    recentState.textContent = "Riproduzione terminata";
-    updatePlayingItem();
-  }, { once: true });
-  currentAudio.addEventListener("error", () => {
-    button.classList.remove("playing");
-    recentState.textContent = "Audio non disponibile";
-    updatePlayingItem();
-  }, { once: true });
-  button.classList.add("playing");
-  recentName.textContent = currentFile.name;
-  recentState.textContent = currentFile.safe === false ? "NOT SAFE" : "SAFE";
-  currentAudio.play().catch(() => showTemporaryMessage("Impossibile riprodurre l'audio"));
+
+function finishPlayback(message = "") {
+  currentAudio = null;
+
+  syncMainPlayButton();
   updatePlayingItem();
+
+  if (message) {
+    showTemporaryMessage(message);
+  }
 }
 
-function matchesMode(audio) {
-  if (currentMode === "all") return true;
-  if (currentMode === "unsafe") return audio.safe === false;
-  return audio.safe === true;
-}
 
-function playRandomMp3() {
-  const files = allMp3Files.filter(matchesMode);
-  if (!files.length) {
-    showTemporaryMessage("Nessun MP3 configurato");
+function stopAudio({
+  resetTime = true,
+  message = ""
+} = {}) {
+  if (!currentAudio) {
+    syncMainPlayButton();
     return;
   }
-  currentAudio?.pause();
-  const selectedFile = files[randomIndex(files.length)];
-  playAudio(selectedFile.path, selectedFile);
+
+  const audio = currentAudio;
+
+  audio.pause();
+
+  if (resetTime) {
+    try {
+      audio.currentTime = 0;
+    } catch (_) {
+      // Alcuni stream potrebbero non consentire il seek.
+    }
+  }
+
+  currentAudio = null;
+
+  syncMainPlayButton();
+  updatePlayingItem();
+
+  if (message) {
+    showTemporaryMessage(message);
+  }
 }
 
-function syncModeUI() {
-  const labels = { safe: "SAFE", unsafe: "NOT SAFE", all: "TUTTI" };
-  const homeLabels = { safe: "SAFE MODE", unsafe: "NOT SAFE MODE", all: "ALL MODE" };
-  const descriptions = {
-    safe: "Riproduce soltanto gli audio contrassegnati come safe.",
-    unsafe: "Riproduce soltanto gli audio contrassegnati come not safe.",
-    all: "Riproduce tutti gli audio, safe e not safe."
-  };
-  labelSwitch.textContent = labels[currentMode];
-  labelSwitch.dataset.mode = currentMode;
-  homeModeLabel.textContent = homeLabels[currentMode];
-  modeDescription.textContent = descriptions[currentMode];
-  modeDot.dataset.mode = currentMode;
-  [safeTab, nsfwTab, allTab].forEach(tab => tab.classList.toggle("active", tab.dataset.mode === currentMode));
-  modeSwitch.querySelectorAll(".switch-option").forEach(option => {
-    const active = option.dataset.mode === currentMode;
-    option.classList.toggle("active", active);
-    option.setAttribute("aria-checked", String(active));
+
+function playAudio(
+  file,
+  audioData = allMp3Files.find(item => item.path === file)
+) {
+  if (!file) return;
+
+  // Ferma qualsiasi audio già in riproduzione.
+  stopAudio({
+    resetTime: true
   });
+
+  currentFile = audioData || {
+    path: file,
+    name: file.split("/").pop()
+  };
+
+  const audio = new Audio(file);
+
+  currentAudio = audio;
+
+
+  audio.addEventListener(
+    "ended",
+    () => {
+      if (currentAudio !== audio) return;
+
+      finishPlayback();
+    },
+    {
+      once: true
+    }
+  );
+
+
+  audio.addEventListener(
+    "error",
+    () => {
+      if (currentAudio !== audio) return;
+
+      finishPlayback("AUDIO NON DISPONIBILE");
+    },
+    {
+      once: true
+    }
+  );
+
+
+  const playPromise = audio.play();
+
+  syncMainPlayButton();
+  updatePlayingItem();
+
+
+  if (
+    playPromise &&
+    typeof playPromise.catch === "function"
+  ) {
+    playPromise.catch(error => {
+      console.error(error);
+
+      if (currentAudio === audio) {
+        finishPlayback(
+          "IMPOSSIBILE RIPRODURRE L'AUDIO"
+        );
+      }
+    });
+  }
+}
+
+
+// ---------------------------------------------------------
+// HOME
+// SAFE e NOT SAFE sono due switch indipendenti.
+// ---------------------------------------------------------
+
+function matchesHomePlayback(audio) {
+  if (audio.safe === false) {
+    return homePlayback.unsafe;
+  }
+
+  return homePlayback.safe;
+}
+
+
+function playRandomMp3() {
+  if (
+    !homePlayback.safe &&
+    !homePlayback.unsafe
+  ) {
+    showTemporaryMessage(
+      "ATTIVA SAFE O NOT SAFE"
+    );
+
+    return;
+  }
+
+  const files =
+    allMp3Files.filter(matchesHomePlayback);
+
+
+  if (!files.length) {
+    showTemporaryMessage(
+      "NESSUN MP3 DISPONIBILE"
+    );
+
+    return;
+  }
+
+  const selectedFile =
+    files[randomIndex(files.length)];
+
+  playAudio(
+    selectedFile.path,
+    selectedFile
+  );
+}
+
+
+function toggleMainPlayback() {
+  if (isAudioPlaying()) {
+    stopAudio();
+    return;
+  }
+
+  playRandomMp3();
+}
+
+
+function syncHomeSwitch(
+  buttonElement,
+  enabled
+) {
+  if (!buttonElement) return;
+
+  buttonElement.classList.toggle(
+    "is-on",
+    enabled
+  );
+
+  buttonElement.setAttribute(
+    "aria-checked",
+    String(enabled)
+  );
+}
+
+
+function setHomeCategory(category) {
+  if (!(category in homePlayback)) {
+    return;
+  }
+
+  homePlayback[category] =
+    !homePlayback[category];
+
+  syncHomeSwitch(
+    homeSafeSwitch,
+    homePlayback.safe
+  );
+
+  syncHomeSwitch(
+    homeUnsafeSwitch,
+    homePlayback.unsafe
+  );
+}
+
+
+// ---------------------------------------------------------
+// LIBRARY
+// Lo stato è completamente separato dalla Home.
+// ---------------------------------------------------------
+
+function matchesLibraryMode(audio) {
+  if (libraryMode === "all") {
+    return true;
+  }
+
+  if (libraryMode === "unsafe") {
+    return audio.safe === false;
+  }
+
+  return audio.safe !== false;
+}
+
+
+function setLibraryMode(mode) {
+  if (
+    !["safe", "unsafe", "all"].includes(mode)
+  ) {
+    return;
+  }
+
+  libraryMode = mode;
+
+
+  [safeTab, nsfwTab, allTab].forEach(tab => {
+    if (!tab) return;
+
+    tab.classList.toggle(
+      "is-active",
+      tab.dataset.mode === libraryMode
+    );
+  });
+
+
   renderAudioList();
 }
 
-function setMode(mode) {
-  if (!["safe", "unsafe", "all"].includes(mode)) return;
-  currentMode = mode;
-  syncModeUI();
+
+// ---------------------------------------------------------
+// ICONA PLAY LIBRARY
+// ---------------------------------------------------------
+
+function createPlayIcon() {
+  const icon =
+    document.createElement("span");
+
+  icon.className = "audio-play-icon";
+
+  icon.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  icon.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7Z"></path>
+    </svg>
+  `;
+
+  return icon;
 }
 
+
+// ---------------------------------------------------------
+// RENDER LIBRARY
+// ---------------------------------------------------------
+
 function renderAudioList() {
-  const query = librarySearch.value.trim().toLowerCase();
-  const files = allMp3Files.filter(audio => matchesMode(audio) && audio.name.toLowerCase().includes(query));
-  audioList.replaceChildren();
-  libraryCount.textContent = `${files.length} audio`;
-  if (!files.length) {
-    const empty = document.createElement("div");
-    empty.className = "rounded-[18px] bg-white/10 px-4 py-8 text-center text-[12px] font-semibold text-white/55";
-    empty.textContent = "Nessun audio trovato";
-    audioList.appendChild(empty);
+  if (
+    !audioList ||
+    !librarySearch ||
+    !libraryCount
+  ) {
     return;
   }
+
+
+  const query =
+    librarySearch.value
+      .trim()
+      .toLowerCase();
+
+
+  const files =
+    allMp3Files.filter(audio => {
+      const name =
+        String(audio.name || "")
+          .toLowerCase();
+
+      return (
+        matchesLibraryMode(audio) &&
+        name.includes(query)
+      );
+    });
+
+
+  audioList.replaceChildren();
+
+
+  libraryCount.textContent =
+    `${files.length} AUDIO`;
+
+
+  if (!files.length) {
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty-library";
+
+    empty.textContent =
+      "NESSUN AUDIO TROVATO";
+
+    audioList.appendChild(empty);
+
+    return;
+  }
+
+
   files.forEach(audio => {
-    const item = document.createElement("button");
+
+    const item =
+      document.createElement("button");
+
     item.type = "button";
-    item.dataset.path = audio.path;
-    item.className = "audio-item flex w-full items-center gap-3 rounded-[18px] border border-white/10 bg-white/10 p-2.5 text-left backdrop-blur-xl transition hover:bg-white/16 active:scale-[.99]";
 
-    const icon = document.createElement("span");
-    icon.className = "grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[#0a0c0a] text-[#ff7a1a] shadow-md";
-    icon.innerHTML = '<svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M9 18V5l11-2v13a3.5 3.5 0 1 1-2-3.16V7.2l-7 1.27V18a3.5 3.5 0 1 1-2-3.16Z"/></svg>';
+    item.dataset.path =
+      audio.path;
 
-    const text = document.createElement("span");
-    text.className = "min-w-0 flex-1";
-    const title = document.createElement("span");
-    title.className = "block truncate text-[13px] font-black text-white";
-    title.textContent = audio.name;
-    const meta = document.createElement("span");
-    meta.className = "mt-0.5 block text-[10px] font-semibold text-white/55";
-    meta.textContent = audio.key ? `Scorciatoia: ${audio.key.toUpperCase()}` : (audio.safe ? "SAFE" : "NOT SAFE");
-    text.append(title, meta);
+    item.className =
+      "audio-item";
 
-    const chevron = document.createElement("span");
-    chevron.className = "text-lg font-black text-white/45";
-    chevron.textContent = "›";
-    item.append(icon, text, chevron);
-    item.addEventListener("click", () => playAudio(audio.path, audio));
+    item.setAttribute(
+      "aria-label",
+      `Riproduci ${audio.name}`
+    );
+
+
+    // Testi della riga.
+    const text =
+      document.createElement("span");
+
+    text.className =
+      "audio-copy";
+
+
+    const title =
+      document.createElement("span");
+
+    title.className =
+      "audio-title";
+
+    title.textContent =
+      audio.name;
+
+
+    const meta =
+      document.createElement("span");
+
+    meta.className =
+      "audio-meta";
+
+
+    meta.textContent =
+      audio.key
+        ? `SCORCIATOIA: ${String(
+          audio.key
+        ).toUpperCase()}`
+        : (
+          audio.safe === false
+            ? "NOT SAFE"
+            : "SAFE"
+        );
+
+
+    text.append(
+      title,
+      meta
+    );
+
+
+    // Icona PLAY al posto della nota.
+    // Nessuna freccia alla fine.
+    item.append(
+      createPlayIcon(),
+      text
+    );
+
+
+    item.addEventListener(
+      "click",
+      () => {
+
+        // Se clicco sull'audio che sta già suonando,
+        // lo fermo.
+        if (
+          isAudioPlaying() &&
+          currentFile?.path === audio.path
+        ) {
+          stopAudio();
+        } else {
+          playAudio(
+            audio.path,
+            audio
+          );
+        }
+      }
+    );
+
+
     audioList.appendChild(item);
   });
+
+
   updatePlayingItem();
 }
 
+
+// ---------------------------------------------------------
+// NAVIGAZIONE
+// ---------------------------------------------------------
+
 function showScreen(screen) {
-  const showHome = screen === "home";
-  homeScreen.classList.toggle("hidden", !showHome);
-  homeScreen.classList.toggle("flex", showHome);
-  libraryScreen.classList.toggle("hidden", showHome);
-  libraryScreen.classList.toggle("flex", !showHome);
-  homeTab.classList.toggle("active", showHome);
-  libraryTab.classList.toggle("active", !showHome);
-  if (!showHome) refreshAudioLibrary();
+  const showHome =
+    screen === "home";
+
+
+  if (homeScreen) {
+    homeScreen.classList.toggle(
+      "is-hidden",
+      !showHome
+    );
+  }
+
+
+  if (libraryScreen) {
+    libraryScreen.classList.toggle(
+      "is-hidden",
+      showHome
+    );
+  }
+
+
+  if (homeTab) {
+    homeTab.classList.toggle(
+      "is-active",
+      showHome
+    );
+
+    homeTab.toggleAttribute(
+      "aria-current",
+      showHome
+    );
+  }
+
+
+  if (libraryTab) {
+    libraryTab.classList.toggle(
+      "is-active",
+      !showHome
+    );
+
+    libraryTab.toggleAttribute(
+      "aria-current",
+      !showHome
+    );
+  }
+
+
+  if (!showHome) {
+    refreshAudioLibrary();
+  }
 }
 
-function openSettings() { settingsPanel.classList.add("open"); }
-function closeSettings() { settingsPanel.classList.remove("open"); }
 
-document.body.addEventListener("keydown", event => {
-  if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) return;
-  if (event.code === "Enter") {
-    playRandomMp3();
-    return;
+// ---------------------------------------------------------
+// TASTIERA
+// ---------------------------------------------------------
+
+document.body.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      ["INPUT", "TEXTAREA", "SELECT"]
+        .includes(
+          document.activeElement?.tagName
+        )
+    ) {
+      return;
+    }
+
+
+    if (
+      event.code === "Enter" ||
+      event.code === "Space"
+    ) {
+      event.preventDefault();
+
+      toggleMainPlayback();
+
+      return;
+    }
+
+
+    const audio =
+      allMp3Files.find(item =>
+        item.key &&
+        event.key.toLowerCase() ===
+        String(item.key).toLowerCase()
+      );
+
+
+    if (audio) {
+      playAudio(
+        audio.path,
+        audio
+      );
+    }
   }
-  const audio = allMp3Files.find(item => item.key && event.key.toLowerCase() === item.key.toLowerCase());
-  if (audio) playAudio(audio.path, audio);
-});
+);
 
-modeSwitch.addEventListener("click", event => {
-  const option = event.target.closest(".switch-option");
-  if (option) setMode(option.dataset.mode);
-});
-button.addEventListener("click", playRandomMp3);
-homeTab.addEventListener("click", () => showScreen("home"));
-libraryTab.addEventListener("click", () => showScreen("library"));
-safeTab.addEventListener("click", () => setMode("safe"));
-nsfwTab.addEventListener("click", () => setMode("unsafe"));
-allTab.addEventListener("click", () => setMode("all"));
-librarySearch.addEventListener("input", renderAudioList);
-settingsButton.addEventListener("click", openSettings);
-settingsBackdrop.addEventListener("click", closeSettings);
-recentCard.addEventListener("click", () => currentFile && playAudio(currentFile.path, currentFile));
-window.addEventListener("focus", refreshAudioLibrary);
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) refreshAudioLibrary();
-});
+
+// ---------------------------------------------------------
+// EVENTI HOME
+// ---------------------------------------------------------
+
+if (button) {
+  button.addEventListener(
+    "click",
+    toggleMainPlayback
+  );
+}
+
+
+if (homeSafeSwitch) {
+  homeSafeSwitch.addEventListener(
+    "click",
+    () => setHomeCategory("safe")
+  );
+}
+
+
+if (homeUnsafeSwitch) {
+  homeUnsafeSwitch.addEventListener(
+    "click",
+    () => setHomeCategory("unsafe")
+  );
+}
+
+
+// ---------------------------------------------------------
+// NAVIGAZIONE
+// ---------------------------------------------------------
+
+if (homeTab) {
+  homeTab.addEventListener(
+    "click",
+    () => showScreen("home")
+  );
+}
+
+
+if (libraryTab) {
+  libraryTab.addEventListener(
+    "click",
+    () => showScreen("library")
+  );
+}
+
+
+// ---------------------------------------------------------
+// FILTRI LIBRARY
+// ---------------------------------------------------------
+
+if (safeTab) {
+  safeTab.addEventListener(
+    "click",
+    () => setLibraryMode("safe")
+  );
+}
+
+
+if (nsfwTab) {
+  nsfwTab.addEventListener(
+    "click",
+    () => setLibraryMode("unsafe")
+  );
+}
+
+
+if (allTab) {
+  allTab.addEventListener(
+    "click",
+    () => setLibraryMode("all")
+  );
+}
+
+
+if (librarySearch) {
+  librarySearch.addEventListener(
+    "input",
+    renderAudioList
+  );
+}
+
+
+// ---------------------------------------------------------
+// AGGIORNAMENTO LIBRARY
+// ---------------------------------------------------------
+
+window.addEventListener(
+  "focus",
+  refreshAudioLibrary
+);
+
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (!document.hidden) {
+      refreshAudioLibrary();
+    }
+  }
+);
+
+
+// ---------------------------------------------------------
+// INIT
+// ---------------------------------------------------------
 
 (async function init() {
+
+  syncHomeSwitch(
+    homeSafeSwitch,
+    homePlayback.safe
+  );
+
+  syncHomeSwitch(
+    homeUnsafeSwitch,
+    homePlayback.unsafe
+  );
+
+
+  syncMainPlayButton();
+
+
+  setLibraryMode(
+    libraryMode
+  );
+
+
   await refreshAudioLibrary();
-  syncModeUI();
+
+
   showScreen("home");
+
 })();

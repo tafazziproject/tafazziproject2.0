@@ -4,12 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d0b">
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Science+Gothic:wght@100..900&display=swap" rel="stylesheet">
-  <link href="style.css" rel="stylesheet">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="shared/supabase-client.js"></script>
@@ -18,133 +14,92 @@
   <title>Tafazzi Project</title>
 </head>
 
-<body class="m-0 min-h-[100dvh] overflow-hidden bg-[#070807] text-white antialiased">
-  <main id="app-shell"
-    class="relative mx-auto h-[100dvh] w-full max-w-[430px] overflow-hidden bg-gradient-to-b from-[#ff7a1a] via-[#2a2119] to-[#0a0c0a] md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[2.5rem] md:shadow-2xl">
-
+<body>
+  <main id="app-shell">
     <!-- HOME -->
-    <section id="home-screen" class="screen absolute inset-0 flex flex-col px-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] pt-[calc(1.25rem+env(safe-area-inset-top))]">
-      <header class="flex items-center justify-between">
-        <div class="flex items-center gap-2 text-[13px] font-black tracking-tight text-white/95">
-          <span class="brand-mark grid h-7 w-7 place-items-center rounded-[9px] bg-[#0a0c0a] text-[#ff7a1a]">T</span>
-          <span>TAFAZZI</span>
-        </div>
-
-        <button id="settings-button" type="button" aria-label="Impostazioni"
-          class="grid h-10 w-10 place-items-center rounded-full bg-[#0a0c0a]/80 text-[#ff7a1a] shadow-lg backdrop-blur-xl transition hover:scale-105 active:scale-95">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
-            <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.5 7.5 0 0 0-1.63-.94L14.38 2.8A.5.5 0 0 0 13.89 2h-3.78a.5.5 0 0 0-.49.4l-.36 2.52c-.58.24-1.12.56-1.63.94L5.24 4.9a.5.5 0 0 0-.61.22L2.71 8.44a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.05.7 1.63.94l.36 2.52a.5.5 0 0 0 .49.4h3.78a.5.5 0 0 0 .49-.4l.36-2.52c.58-.24 1.12-.55 1.63-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
-          </svg>
-        </button>
+    <section id="home-screen" class="screen home-screen" aria-label="Home">
+      <header class="brand-header">
+        <img class="brand-logo" src="logo.png" alt="Tafazzi Project">
       </header>
 
-      <div class="flex flex-1 flex-col items-center justify-center -translate-y-5">
-        <p id="play-label" class="mb-5 text-[17px] font-black tracking-tight text-white">Tap to Tafazzi</p>
+      <div class="play-area">
+        <div id="pulse-stage" class="pulse-stage" aria-hidden="true">
+          <span class="pulse-ring ring-1"></span>
+          <span class="pulse-ring ring-2"></span>
+          <span class="pulse-ring ring-3"></span>
+          <span class="pulse-ring ring-4"></span>
+        </div>
 
-        <button id="playButton" type="button" aria-label="Riproduci un audio casuale"
-          class="group relative grid h-[154px] w-[154px] place-items-center rounded-full border border-[#ffb071]/45 bg-black/25 shadow-[0_16px_50px_rgba(0,0,0,.38)] backdrop-blur-md transition active:scale-95 disabled:cursor-wait disabled:opacity-70">
-          <span class="absolute inset-[1px] rounded-full bg-gradient-to-br from-white/15 via-transparent to-[#49d17d]/10"></span>
-          <span class="relative grid h-[92px] w-[92px] place-items-center rounded-full bg-[#0a0c0a] text-[#ff7a1a] shadow-xl transition-transform duration-200 group-hover:scale-105">
-            <!-- Marchio originale Tafazzi: monogramma T + accento sonoro -->
-            <svg viewBox="0 0 96 96" class="h-[58px] w-[58px]" aria-hidden="true">
-              <path fill="currentColor" d="M22 20h52v13H55v43H41V33H22Z"/>
-              <path fill="#49d17d" d="M63 46h8v20h-8zM75 38h8v36h-8z"/>
-              <circle cx="29" cy="63" r="6" fill="#49d17d"/>
-            </svg>
-          </span>
+        <button id="playButton" class="main-play-button" type="button" aria-label="Riproduci un audio casuale"
+          aria-pressed="false">
+          <span id="play-button-text">PLAY</span>
         </button>
 
-        <div class="mt-6 flex items-center gap-2 rounded-full bg-black/28 px-3 py-1.5 backdrop-blur-md">
-          <span id="mode-dot" class="h-2 w-2 rounded-full bg-[#49d17d]"></span>
-          <span id="home-mode-label" class="text-[11px] font-black tracking-[.16em] text-white/85">SAFE MODE</span>
-        </div>
+        <p id="play-status" class="play-status" aria-live="polite"></p>
       </div>
 
-      <section class="mb-1">
-        <div class="mb-2 px-3 text-[11px] font-bold text-white/65">Recently played</div>
-        <button id="recent-card" type="button"
-          class="flex w-full items-center gap-3 rounded-[18px] border border-white/8 bg-black/22 p-2.5 text-left shadow-[0_10px_30px_rgba(0,0,0,.22)] backdrop-blur-xl transition hover:bg-black/30 active:scale-[.99]">
-          <div class="grid h-12 w-12 shrink-0 place-items-center rounded-[11px] bg-[#0a0c0a] text-[#ff7a1a] shadow-md">
-            <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current" aria-hidden="true"><path d="M9 18V5l11-2v13a3.5 3.5 0 1 1-2-3.16V7.2l-7 1.27V18a3.5 3.5 0 1 1-2-3.16Z"/></svg>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="text-[10px] font-semibold text-white/55">Ultimo audio</div>
-            <div id="recent-name" class="truncate text-[13px] font-black text-white">Nessuna riproduzione</div>
-            <div id="recent-state" class="text-[10px] font-medium text-white/60">Tocca il pulsante centrale</div>
-          </div>
-          <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 fill-none stroke-white/65 stroke-2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-      </section>
+      <div class="home-switches" aria-label="Categorie da includere nella riproduzione casuale">
+        <div class="home-switch-row">
+          <span class="home-switch-label">SAFE</span>
+          <button id="home-safe-switch" class="toggle-switch is-on" type="button" role="switch" aria-checked="true"
+            aria-label="Includi audio safe">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+
+        <div class="home-switch-row">
+          <span class="home-switch-label">NOT SAFE</span>
+          <button id="home-unsafe-switch" class="toggle-switch" type="button" role="switch" aria-checked="false"
+            aria-label="Includi audio not safe">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- LIBRARY -->
-    <section id="library-screen" class="screen absolute inset-0 hidden flex-col px-5 pb-[calc(7.5rem+env(safe-area-inset-bottom))] pt-[calc(1.25rem+env(safe-area-inset-top))]">
-      <header class="mb-5 flex items-center justify-between">
-        <div>
-          <p class="text-[11px] font-bold uppercase tracking-[.18em] text-white/55">Tafazzi Project</p>
-          <h1 class="text-[30px] font-black tracking-[-.04em]">Library</h1>
+    <section id="library-screen" class="screen library-screen is-hidden" aria-label="Library">
+      <header class="library-header">
+        <div class="library-heading-row">
+          <h1>LIBRARY</h1>
+          <span id="library-count" class="library-count">0 AUDIO</span>
         </div>
-        <div id="library-count" class="rounded-full bg-black/25 px-3 py-1.5 text-[11px] font-black text-white/80 backdrop-blur-xl">0 audio</div>
       </header>
 
-      <div class="mb-4 grid grid-cols-3 rounded-[18px] bg-black/30 p-1 backdrop-blur-xl" role="group" aria-label="Filtro contenuti Library">
-        <button id="safe-tab" type="button" data-mode="safe" class="mode-tab active rounded-[14px] px-2 py-2.5 text-[11px] font-black transition">SAFE</button>
-        <button id="nsfw-tab" type="button" data-mode="unsafe" class="mode-tab rounded-[14px] px-2 py-2.5 text-[11px] font-black transition">NOT SAFE</button>
-        <button id="all-tab" type="button" data-mode="all" class="mode-tab rounded-[14px] px-2 py-2.5 text-[11px] font-black transition">TUTTI</button>
+      <div class="library-filter" role="group" aria-label="Filtro contenuti Library">
+        <button id="safe-tab" type="button" data-mode="safe" class="library-filter-button is-active">SAFE</button>
+        <button id="nsfw-tab" type="button" data-mode="unsafe" class="library-filter-button">NOT SAFE</button>
+        <button id="all-tab" type="button" data-mode="all" class="library-filter-button">TUTTI</button>
       </div>
 
-      <div class="relative mb-4">
-        <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 fill-none stroke-white/55 stroke-2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-        <input id="library-search" type="search" placeholder="Cerca audio"
-          class="w-full rounded-[16px] border border-white/8 bg-black/25 py-3 pl-10 pr-4 text-[13px] font-semibold text-white outline-none placeholder:text-white/45 focus:bg-black/35">
-      </div>
+      <label class="library-search-wrap" for="library-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-4-4"></path>
+        </svg>
+        <input id="library-search" type="search" placeholder="CERCA AUDIO" autocomplete="off">
+      </label>
 
-      <div id="audio-list" class="scrollbar-none flex-1 space-y-2 overflow-y-auto pr-0.5"></div>
+      <div id="audio-list" class="audio-list"></div>
     </section>
 
     <!-- Bottom navigation -->
-    <nav id="bottom-nav"
-      class="absolute bottom-[calc(.75rem+env(safe-area-inset-bottom))] left-1/2 z-30 flex w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-1 rounded-[24px] border border-white/10 bg-[#0a0c0a]/88 p-1.5 text-white/60 shadow-[0_14px_40px_rgba(0,0,0,.34)] backdrop-blur-2xl">
-      <button id="home-tab" type="button" class="nav-item active flex flex-1 flex-col items-center justify-center rounded-[19px] py-2 text-[10px] font-black transition">
-        <svg viewBox="0 0 24 24" class="mb-0.5 h-5 w-5 fill-current" aria-hidden="true"><path d="M3 10.6 12 3l9 7.6V21h-6v-6H9v6H3Z"/></svg>
-        Home
+    <nav id="bottom-nav" class="bottom-nav" aria-label="Navigazione principale">
+      <button id="home-tab" type="button" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 10.6 12 3l9 7.6V21h-6v-6H9v6H3Z"></path>
+        </svg>
+        <span>HOME</span>
       </button>
-      <button id="library-tab" type="button" class="nav-item flex flex-1 flex-col items-center justify-center rounded-[19px] py-2 text-[10px] font-black transition">
-        <svg viewBox="0 0 24 24" class="mb-0.5 h-5 w-5 fill-current" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2 3v11h2V7H7Zm4 0v11h2V7h-2Zm4 0v11h2V7h-2Z"/></svg>
-        Library
+      <button id="library-tab" type="button" class="nav-item">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2 3v11h2V7H7Zm4 0v11h2V7h-2Zm4 0v11h2V7h-2Z">
+          </path>
+        </svg>
+        <span>LIBRARY</span>
       </button>
     </nav>
-
-    <!-- Settings modal / triplo switch -->
-    <div id="settings-panel" class="pointer-events-none absolute inset-0 z-50 flex items-end bg-black/0 opacity-0 transition duration-300">
-      <button id="settings-backdrop" class="absolute inset-0 cursor-default" aria-label="Chiudi impostazioni"></button>
-      <div id="settings-sheet" class="relative z-10 w-full translate-y-full rounded-t-[30px] border-t border-white/10 bg-[#111410]/96 px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-3 text-white shadow-2xl backdrop-blur-2xl transition duration-300">
-        <div class="mx-auto mb-4 h-1.5 w-12 rounded-full bg-white/12"></div>
-        <div class="mb-5 flex items-center justify-between">
-          <div>
-            <div class="text-[11px] font-black uppercase tracking-[.14em] text-white/40">Riproduzione</div>
-            <div class="text-xl font-black">Modalità contenuti</div>
-          </div>
-          <span id="switch-label" class="mode-badge" data-mode="safe">SAFE</span>
-        </div>
-
-        <div id="mode-switch" class="grid grid-cols-3 rounded-[20px] bg-black/45 p-1.5" role="radiogroup" aria-label="Modalità contenuti">
-          <button type="button" class="switch-option active" data-mode="safe" role="radio" aria-checked="true">
-            <span class="switch-dot bg-[#49d17d]"></span>
-            <span>SAFE</span>
-          </button>
-          <button type="button" class="switch-option" data-mode="unsafe" role="radio" aria-checked="false">
-            <span class="switch-dot bg-[#ff7a1a]"></span>
-            <span>NOT SAFE</span>
-          </button>
-          <button type="button" class="switch-option" data-mode="all" role="radio" aria-checked="false">
-            <span class="switch-dot bg-white/75"></span>
-            <span>TUTTI</span>
-          </button>
-        </div>
-        <p id="mode-description" class="mt-3 px-1 text-[11px] font-semibold leading-relaxed text-white/45">Riproduce soltanto gli audio contrassegnati come safe.</p>
-      </div>
-    </div>
   </main>
 </body>
 
