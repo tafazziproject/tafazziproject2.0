@@ -1022,7 +1022,7 @@ function renderLibrary() {
     icon.className =
       "audio-icon";
 
-    icon.textContent = "♪";
+    icon.textContent = "";
 
     /* INFO */
 

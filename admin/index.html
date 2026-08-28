@@ -1,141 +1,412 @@
 <!doctype html>
 <html lang="it">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0a0c0a">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Science+Gothic:wght@100..900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="admin.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../shared/supabase-client.js"></script>
   <script src="../shared/audio-store.js"></script>
   <script src="admin.js" defer></script>
+
   <title>Tafazzi — Audio Manager</title>
 </head>
+
 <body>
+
   <section id="login-view" class="login-view">
+
     <div class="login-box">
-      <div class="brand"><span class="brand-mark">T</span><span>TAFAZZI</span></div>
-      <div class="login-copy">
-        <span class="eyebrow">Area riservata</span>
-        <h1>Audio<br>Manager.</h1>
-        <p>Accedi con l'account amministratore Supabase per inserire, modificare, ascoltare o cancellare gli audio disponibili nel frontend.</p>
+
+      <div class="brand">
+        <img class="brand-logo" src="../logo.png" alt="Tafazzi Project">
       </div>
+
+      <div class="login-copy">
+
+        <span class="eyebrow">
+          Area riservata
+        </span>
+
+        <h1>
+          Audio<br>
+          Manager.
+        </h1>
+
+        <p>
+          Accedi con l'account amministratore Supabase per inserire,
+          modificare, ascoltare o cancellare gli audio disponibili
+          nel frontend.
+        </p>
+
+      </div>
+
       <form id="login-form" class="stack">
-        <label>Email<input id="email" type="email" autocomplete="username" required></label>
-        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+
+        <label>
+          Email
+
+          <input id="email" type="email" autocomplete="username" required>
+        </label>
+
+        <label>
+          Password
+
+          <input id="password" type="password" autocomplete="current-password" required>
+        </label>
+
         <p id="login-error" class="message error hidden"></p>
-        <button class="primary" type="submit">ACCEDI</button>
+
+        <button class="primary" type="submit">
+          ACCEDI
+        </button>
+
       </form>
+
     </div>
+
   </section>
 
+
   <main id="admin-view" class="admin-layout hidden">
+
     <aside class="sidebar">
-      <div class="brand"><span class="brand-mark">T</span><span>TAFAZZI</span></div>
+
+      <div class="brand">
+
+        <img class="brand-logo" src="../logo.png" alt="Tafazzi Project">
+
+      </div>
+
+
       <nav>
-        <button class="side-link active" type="button">Libreria audio</button>
-        <a class="side-link" href="../index.html" target="_blank" rel="noopener">Apri frontend ↗</a>
+
+        <button class="side-link active" type="button">
+          Libreria audio
+        </button>
+
+        <a class="side-link" href="../index.html" target="_blank" rel="noopener">
+          Apri frontend ↗
+        </a>
+
       </nav>
-      <button id="logout" class="logout" type="button">Esci</button>
+
+
+      <button id="logout" class="logout" type="button">
+        Esci
+      </button>
+
     </aside>
 
+
     <section class="content">
+
       <header class="page-head">
+
         <div>
-          <span class="eyebrow">Gestionale Supabase</span>
-          <h1>Libreria audio</h1>
-          <p>Gli audio vengono salvati nello Storage Supabase e sono subito disponibili nel frontend pubblicato su GitHub Pages.</p>
+
+          <span class="eyebrow">
+            Gestionale Supabase
+          </span>
+
+          <h1>
+            Libreria audio
+          </h1>
+
+          <p>
+            Gli audio vengono salvati nello Storage Supabase
+            e sono subito disponibili nel frontend pubblicato
+            su GitHub Pages.
+          </p>
+
         </div>
-        <div class="counter"><strong id="total-count">0</strong><span>audio attivi</span></div>
+
+
+        <div class="counter">
+
+          <strong id="total-count">
+            0
+          </strong>
+
+          <span>
+            audio attivi
+          </span>
+
+        </div>
+
       </header>
 
+
       <section class="card upload-card">
+
         <div class="card-head">
-          <div><span class="eyebrow">Nuovo contenuto</span><h2>Carica uno o più audio</h2></div>
-        </div>
-        <form id="upload-form" class="upload-grid">
-          <label id="file-drop" class="file-drop">
-            <input id="audio-file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/aac,.mp3,.wav,.ogg,.m4a,.aac" multiple>
-            <span class="upload-icon">＋</span>
-            <span>
-              <strong id="file-label">Trascina qui gli audio oppure clicca per sceglierli</strong>
-              <small>MP3, WAV, OGG, M4A o AAC · max 30 MB per file · selezione multipla</small>
+
+          <div>
+
+            <span class="eyebrow">
+              Nuovo contenuto
             </span>
+
+            <h2>
+              Carica uno o più audio
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <form id="upload-form" class="upload-grid">
+
+          <label id="file-drop" class="file-drop">
+
+            <input id="audio-file" type="file"
+              accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/aac,.mp3,.wav,.ogg,.m4a,.aac" multiple>
+
+            <span class="upload-icon">
+              ＋
+            </span>
+
+            <span>
+
+              <strong id="file-label">
+                Trascina qui gli audio oppure clicca per sceglierli
+              </strong>
+
+              <small>
+                MP3, WAV, OGG, M4A o AAC · max 30 MB per file · selezione multipla
+              </small>
+
+            </span>
+
           </label>
+
 
           <div id="upload-queue" class="upload-queue hidden" aria-live="polite"></div>
 
+
           <div class="submit-row">
+
             <p id="upload-message" class="message hidden"></p>
-            <button id="upload-clear" class="secondary hidden" type="button">SVUOTA</button>
-            <button id="upload-submit" class="primary" type="submit" disabled>CARICA AUDIO</button>
+
+            <button id="upload-clear" class="secondary hidden" type="button">
+              SVUOTA
+            </button>
+
+            <button id="upload-submit" class="primary" type="submit" disabled>
+              CARICA AUDIO
+            </button>
+
           </div>
+
         </form>
+
       </section>
+
 
       <section class="card library-card">
+
         <div class="library-tools">
-          <div><span class="eyebrow">Archivio</span><h2>Audio disponibili</h2></div>
-          <div class="filters">
-            <input id="search" type="search" placeholder="Cerca audio...">
-            <select id="filter">
-              <option value="all">Tutti</option>
-              <option value="safe">SAFE</option>
-              <option value="unsafe">NOT SAFE</option>
-            </select>
+
+          <div>
+
+            <span class="eyebrow">
+              Archivio
+            </span>
+
+            <h2>
+              Audio disponibili
+            </h2>
+
           </div>
+
+
+          <div class="filters">
+
+            <input id="search" type="search" placeholder="Cerca audio...">
+
+            <select id="filter">
+
+              <option value="all">
+                Tutti
+              </option>
+
+              <option value="safe">
+                SAFE
+              </option>
+
+              <option value="unsafe">
+                NOT SAFE
+              </option>
+
+            </select>
+
+          </div>
+
         </div>
+
+
+        <!-- PLAYER -->
+
+        <div class="library-player">
+
+          <div class="player-copy">
+
+            <span class="eyebrow">
+              Player
+            </span>
+
+            <strong id="player-title">
+              Seleziona un audio dalla libreria
+            </strong>
+
+          </div>
+
+
+          <audio id="admin-player" class="admin-player" controls preload="metadata"></audio>
+
+        </div>
+
 
         <div class="selection-bar">
+
           <label class="selection-toggle">
+
             <input id="select-all" type="checkbox">
-            <span>Seleziona tutti</span>
+
+            <span>
+              Seleziona tutti
+            </span>
+
           </label>
-          <span id="selection-count" class="selection-count">0 selezionati</span>
-          <button id="bulk-delete" class="danger compact" type="button" disabled>ELIMINA SELEZIONATI</button>
+
+
+          <span id="selection-count" class="selection-count">
+            0 selezionati
+          </span>
+
+
+          <button id="bulk-delete" class="danger compact" type="button" disabled>
+            ELIMINA SELEZIONATI
+          </button>
+
         </div>
 
+
         <div id="audio-list" class="audio-list"></div>
+
       </section>
+
     </section>
+
   </main>
 
+
   <dialog id="edit-dialog">
+
     <form id="edit-form" class="dialog-card">
-      <span class="eyebrow">Modifica audio</span>
-      <h2>Modifica informazioni</h2>
+
+      <span class="eyebrow">
+        Modifica audio
+      </span>
+
+      <h2>
+        Modifica informazioni
+      </h2>
+
+
       <div class="edit-fields">
-        <label>Nome visualizzato<input id="edit-name" maxlength="80" required></label>
-        <label>Categoria
-          <select id="edit-safety">
-            <option value="safe">SAFE</option>
-            <option value="unsafe">NOT SAFE</option>
-          </select>
+
+        <label>
+          Nome visualizzato
+
+          <input id="edit-name" maxlength="80" required>
         </label>
-        <label>Scorciatoia<input id="edit-key" maxlength="1" placeholder="Opzionale"></label>
+
+
+        <label>
+          Categoria
+
+          <select id="edit-safety">
+
+            <option value="safe">
+              SAFE
+            </option>
+
+            <option value="unsafe">
+              NOT SAFE
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label>
+          Scorciatoia
+
+          <input id="edit-key" maxlength="1" placeholder="Opzionale">
+        </label>
+
       </div>
+
+
       <p id="edit-message" class="message hidden"></p>
+
+
       <div class="dialog-actions">
-        <button id="edit-cancel" class="secondary" type="button">Annulla</button>
-        <button id="edit-save" class="primary" type="submit">SALVA MODIFICHE</button>
+
+        <button id="edit-cancel" class="secondary" type="button">
+          Annulla
+        </button>
+
+        <button id="edit-save" class="primary" type="submit">
+          SALVA MODIFICHE
+        </button>
+
       </div>
+
     </form>
+
   </dialog>
 
+
   <dialog id="confirm-dialog">
+
     <form method="dialog" class="dialog-card">
-      <span class="eyebrow">Conferma</span>
-      <h2 id="confirm-title">Eliminare questo audio?</h2>
+
+      <span class="eyebrow">
+        Conferma
+      </span>
+
+      <h2 id="confirm-title">
+        Eliminare questo audio?
+      </h2>
+
       <p id="confirm-copy"></p>
+
+
       <div class="dialog-actions">
-        <button value="cancel" class="secondary">Annulla</button>
-        <button id="confirm-delete" value="default" class="danger">Elimina</button>
+
+        <button value="cancel" class="secondary">
+          Annulla
+        </button>
+
+        <button id="confirm-delete" value="default" class="danger">
+          Elimina
+        </button>
+
       </div>
+
     </form>
+
   </dialog>
+
 </body>
+
 </html>
