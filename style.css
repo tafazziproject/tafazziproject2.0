@@ -15,17 +15,27 @@
   --black: #000000;
   --white: #ffffff;
 
-  --green: #12d953;
-  --green-dark: #10ad3f;
+  --orange: #ff7a1a;
+  --green: #49d17d;
 
   --red: #e33131;
   --red-dark: #a91e1e;
 
-  --brown: #6e2900;
-  --brown-bright: #a74600;
-
   --switch-off: #655153;
   --switch-knob: #dedede;
+
+  /*
+   * HOME:
+   * centro condiviso tra alone,
+   * PLAY e onde.
+   */
+  --home-halo-y: 52%;
+
+  /*
+   * LIBRARY:
+   * centro indipendente dell'alone.
+   */
+  --library-halo-y: 52%;
 }
 
 
@@ -46,9 +56,10 @@ body {
 
 body {
   min-height: 100dvh;
+
   overflow: hidden;
 
-  background: #000;
+  background: #000000;
   color: var(--white);
 
   font-family:
@@ -88,41 +99,13 @@ button {
 
   overflow: hidden;
 
-  background:
-    radial-gradient(ellipse 112% 46% at 50% 52%,
-      rgba(178, 68, 0, .97) 0%,
-      rgba(121, 43, 0, .92) 34%,
-      rgba(54, 16, 0, .72) 58%,
-      rgba(8, 2, 0, .20) 77%,
-      transparent 84%),
-    linear-gradient(180deg,
-      #000 0%,
-      #050201 18%,
-      #1a0700 29%,
-      #6d2600 49%,
-      #4b1700 67%,
-      #0a0200 81%,
-      #000 100%);
+  background: #000000;
 
   isolation: isolate;
 }
 
 #app-shell::before {
-  content: "";
-
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-
-  background:
-    radial-gradient(circle at 50% 52%,
-      rgba(255, 118, 0, .11),
-      transparent 46%);
-
-  mix-blend-mode: screen;
-
-  z-index: -1;
+  display: none;
 }
 
 
@@ -157,6 +140,41 @@ button {
 
   padding:
     calc(32px + env(safe-area-inset-top)) 22px calc(90px + env(safe-area-inset-bottom));
+
+  /*
+   * ALONE HOME
+   *
+   * Usa la stessa coordinata verticale
+   * del pulsante PLAY.
+   */
+  background:
+    radial-gradient(ellipse 112% 42% at 50% var(--home-halo-y),
+
+      rgba(255, 122, 26, 1) 0%,
+
+      rgba(255, 122, 26, .98) 10%,
+
+      rgba(255, 122, 26, .92) 20%,
+
+      rgba(255, 122, 26, .82) 31%,
+
+      rgba(255, 122, 26, .69) 42%,
+
+      rgba(255, 122, 26, .54) 53%,
+
+      rgba(255, 122, 26, .39) 63%,
+
+      rgba(255, 122, 26, .27) 72%,
+
+      rgba(255, 122, 26, .17) 80%,
+
+      rgba(255, 122, 26, .09) 87%,
+
+      rgba(255, 122, 26, .035) 94%,
+
+      rgba(255, 122, 26, 0) 100%),
+
+    #000000;
 }
 
 
@@ -166,6 +184,10 @@ button {
 
 .brand-header {
   grid-row: 1;
+
+  position: relative;
+
+  z-index: 20;
 
   display: flex;
 
@@ -185,13 +207,13 @@ button {
 
 /* =========================================================
    PLAY AREA
-   CENTRATA SUL BG ARANCIONE
    ========================================================= */
 
 .play-area {
   position: absolute;
 
-  top: 52%;
+  top: var(--home-halo-y);
+
   left: 0;
   right: 0;
 
@@ -204,12 +226,17 @@ button {
 
   min-height: 0;
 
-  transform: none;
+  z-index: 5;
+}
+
+.play-area::before,
+.play-area::after {
+  display: none;
 }
 
 
 /* =========================================================
-   CERCHI / ONDE
+   ONDE
    ========================================================= */
 
 .pulse-stage {
@@ -218,7 +245,7 @@ button {
   left: 50%;
   top: 50%;
 
-  width: min(88vw, 374px);
+  width: min(72vw, 305px);
 
   aspect-ratio: 1;
 
@@ -226,6 +253,8 @@ button {
     translate(-50%, -50%);
 
   pointer-events: none;
+
+  z-index: 2;
 }
 
 .pulse-ring {
@@ -235,7 +264,7 @@ button {
   top: 50%;
 
   border:
-    1px solid rgba(255, 225, 198, .27);
+    1px solid rgba(255, 238, 220, .28);
 
   border-radius: 999px;
 
@@ -243,25 +272,25 @@ button {
     translate(-50%, -50%);
 
   box-shadow:
-    0 0 16px rgba(255, 157, 76, .025);
+    0 0 14px rgba(255, 122, 26, .035);
 }
 
 .ring-1 {
-  width: 43%;
-  height: 43%;
+  width: 46%;
+  height: 46%;
 
   border-color:
-    rgba(255, 229, 204, .45);
+    rgba(255, 239, 224, .50);
 }
 
 .ring-2 {
-  width: 63%;
-  height: 63%;
+  width: 64%;
+  height: 64%;
 }
 
 .ring-3 {
-  width: 84%;
-  height: 84%;
+  width: 82%;
+  height: 82%;
 }
 
 .ring-4 {
@@ -269,12 +298,12 @@ button {
   height: 100%;
 
   border-color:
-    rgba(255, 225, 198, .22);
+    rgba(255, 235, 218, .20);
 }
 
 
 /* =========================================================
-   PULSANTE PLAY / STOP
+   PULSANTE PLAY
    ========================================================= */
 
 .main-play-button {
@@ -283,7 +312,9 @@ button {
   z-index: 5;
 
   width:
-    clamp(124px, 31vw, 136px);
+    clamp(124px,
+      31vw,
+      136px);
 
   aspect-ratio: 1;
 
@@ -292,20 +323,24 @@ button {
   cursor: pointer;
 
   background:
-    linear-gradient(150deg,
-      #10b13c 0%,
-      var(--green) 55%,
-      #13c64a 100%);
+    var(--green);
 
-  color: #fff;
+  color:
+    #ffffff;
 
   box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, .35),
-    0 10px 26px rgba(0, 0, 0, .25),
-    0 0 0 1px rgba(108, 255, 150, .25);
+    inset 0 1px 2px rgba(255, 255, 255, .30),
+
+    0 10px 28px rgba(0, 0, 0, .30),
+
+    0 0 0 1px rgba(73, 209, 125, .35),
+
+    0 0 28px rgba(73, 209, 125, .10);
 
   font-size:
-    clamp(18px, 5vw, 24px);
+    clamp(18px,
+      5vw,
+      24px);
 
   line-height: 1;
 
@@ -327,7 +362,7 @@ button {
 
 
 /* =========================================================
-   PLAY BUTTON DURANTE RIPRODUZIONE
+   PULSANTE STOP
    ========================================================= */
 
 .main-play-button.is-playing {
@@ -338,8 +373,11 @@ button {
 
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, .25),
+
     0 12px 32px rgba(0, 0, 0, .35),
+
     0 0 0 1px rgba(255, 127, 127, .24),
+
     0 0 34px rgba(227, 49, 49, .16);
 }
 
@@ -354,7 +392,9 @@ button {
   top: 91px;
   left: 50%;
 
-  width: min(330px, 86vw);
+  width:
+    min(330px,
+      86vw);
 
   min-height: 16px;
 
@@ -373,6 +413,8 @@ button {
   text-align: center;
 
   letter-spacing: .02em;
+
+  z-index: 6;
 }
 
 
@@ -385,7 +427,7 @@ button {
     tafazzi-wave 1.8s ease-out infinite;
 
   border-color:
-    rgba(255, 225, 198, .48);
+    rgba(255, 239, 224, .48);
 }
 
 .pulse-stage.is-playing .ring-2 {
@@ -414,17 +456,16 @@ button {
   }
 
   100% {
-    opacity: .1;
+    opacity: .08;
 
     transform:
-      translate(-50%, -50%) scale(1.05);
+      translate(-50%, -50%) scale(1.04);
   }
 }
 
 
 /* =========================================================
    HOME SWITCHES
-   POSIZIONATI POCO SOPRA LA NAV
    ========================================================= */
 
 .home-switches {
@@ -433,10 +474,6 @@ button {
   left: 0;
   right: 0;
 
-  /*
-   * Porta SAFE / NOT SAFE verso il basso,
-   * poco sopra Home / Library.
-   */
   bottom:
     calc(86px + env(safe-area-inset-bottom));
 
@@ -449,6 +486,8 @@ button {
   padding: 0;
 
   z-index: 20;
+
+  padding-bottom: 20px;
 }
 
 .home-switch-row {
@@ -461,18 +500,22 @@ button {
 
 
 /* =========================================================
-   TESTO SAFE / NOT SAFE
+   TESTO SAFE / NOT SAFE HOME
    ========================================================= */
 
 .home-switch-label {
   font-size:
-    clamp(12px, 3.6vw, 15px);
+    clamp(12px,
+      3.6vw,
+      15px);
 
   line-height: 1;
 
   letter-spacing: -.03em;
 
   text-align: center;
+
+  color: #ffffff;
 }
 
 
@@ -500,7 +543,8 @@ button {
 
   transition:
     background .22s ease,
-    transform .16s ease;
+    transform .16s ease,
+    box-shadow .22s ease;
 }
 
 .toggle-switch:active {
@@ -509,9 +553,12 @@ button {
 
 .toggle-switch.is-on {
   background:
-    linear-gradient(90deg,
-      #07c884,
-      #08d28d);
+    var(--green);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .08),
+
+    0 0 14px rgba(73, 209, 125, .10);
 }
 
 
@@ -537,7 +584,10 @@ button {
     0 2px 8px rgba(0, 0, 0, .28);
 
   transition:
-    transform .22s cubic-bezier(.2, .75, .25, 1);
+    transform .22s cubic-bezier(.2,
+      .75,
+      .25,
+      1);
 }
 
 .toggle-switch.is-on .toggle-knob {
@@ -550,13 +600,142 @@ button {
    LIBRARY
    ========================================================= */
 
-.library-screen {
+#library-screen {
+  position: absolute;
+
+  inset: 0;
+
   display: flex;
 
   flex-direction: column;
 
   padding:
     calc(22px + env(safe-area-inset-top)) 18px calc(92px + env(safe-area-inset-bottom));
+
+  overflow: hidden;
+
+  background:
+    #000000;
+
+  isolation: isolate;
+}
+
+
+/* =========================================================
+   ALONE ARANCIONE LIBRARY
+   MOLTO PIÙ MORBIDO
+   ========================================================= */
+
+#library-screen::before {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  top: var(--library-halo-y);
+
+  /*
+   * Più grande, meno intenso:
+   * in questo modo la transizione
+   * verso il nero è molto più morbida.
+   */
+  width: 155%;
+  height: 66%;
+
+  transform:
+    translate(-50%, -50%);
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(ellipse at center,
+
+      rgba(255, 122, 26, .34) 0%,
+
+      rgba(255, 122, 26, .31) 12%,
+
+      rgba(255, 122, 26, .27) 24%,
+
+      rgba(255, 122, 26, .22) 36%,
+
+      rgba(255, 122, 26, .17) 48%,
+
+      rgba(255, 122, 26, .12) 60%,
+
+      rgba(255, 122, 26, .075) 70%,
+
+      rgba(255, 122, 26, .042) 79%,
+
+      rgba(255, 122, 26, .020) 87%,
+
+      rgba(255, 122, 26, .008) 94%,
+
+      rgba(255, 122, 26, 0) 100%);
+
+  /*
+   * Blur leggero per eliminare
+   * qualsiasi stacco netto.
+   */
+  filter:
+    blur(22px);
+
+  opacity: .95;
+
+  z-index: 0;
+}
+
+
+/*
+ * Secondissimo alone molto leggero.
+ * Serve solo a dare profondità
+ * senza rendere il centro troppo acceso.
+ */
+
+#library-screen::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  top: var(--library-halo-y);
+
+  width: 105%;
+  height: 44%;
+
+  transform:
+    translate(-50%, -50%);
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(ellipse at center,
+
+      rgba(255, 122, 26, .085) 0%,
+
+      rgba(255, 122, 26, .060) 30%,
+
+      rgba(255, 122, 26, .030) 55%,
+
+      rgba(255, 122, 26, .010) 75%,
+
+      rgba(255, 122, 26, 0) 100%);
+
+  filter:
+    blur(18px);
+
+  z-index: 0;
+}
+
+
+/*
+ * Tutto il contenuto Library
+ * resta sopra all'alone.
+ */
+
+#library-screen>* {
+  position: relative;
+
+  z-index: 1;
 }
 
 .library-header {
@@ -586,7 +765,9 @@ button {
   margin: 0;
 
   font-size:
-    clamp(24px, 8vw, 33px);
+    clamp(24px,
+      8vw,
+      33px);
 
   line-height: 1;
 
@@ -603,15 +784,20 @@ button {
   border:
     1px solid rgba(255, 255, 255, .10);
 
-  border-radius: 999px;
+  border-radius:
+    999px;
 
   background:
     rgba(0, 0, 0, .34);
 
   color:
-    rgba(255, 255, 255, .78);
+    rgba(255, 255, 255, .80);
 
-  font-size: 9px;
+  font-size:
+    9px;
+
+  backdrop-filter:
+    blur(12px);
 }
 
 
@@ -623,7 +809,8 @@ button {
   display: grid;
 
   grid-template-columns:
-    repeat(3, 1fr);
+    repeat(3,
+      1fr);
 
   gap: 5px;
 
@@ -634,13 +821,18 @@ button {
   border:
     1px solid rgba(255, 255, 255, .08);
 
-  border-radius: 16px;
+  border-radius:
+    16px;
 
+  /*
+   * Più scuro per mantenere
+   * leggibilità sopra l'alone.
+   */
   background:
-    rgba(0, 0, 0, .32);
+    rgba(0, 0, 0, .43);
 
   backdrop-filter:
-    blur(12px);
+    blur(14px);
 }
 
 .library-filter-button {
@@ -649,16 +841,20 @@ button {
   padding:
     11px 5px;
 
-  border-radius: 12px;
+  border-radius:
+    12px;
 
-  background: transparent;
+  background:
+    transparent;
 
   color:
-    rgba(255, 255, 255, .55);
+    rgba(255, 255, 255, .60);
 
-  font-size: 12px;
+  font-size:
+    12px;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   transition:
     color .18s ease,
@@ -666,14 +862,29 @@ button {
     transform .14s ease;
 }
 
+
+/*
+ * Nessuna gestione :hover.
+ */
 .library-filter-button:active {
-  transform: scale(.97);
+  transform:
+    scale(.97);
 }
 
-.library-filter-button.is-active {
-  background: #fff;
 
-  color: #0a0a0a;
+/*
+ * FILTRO SELEZIONATO:
+ * bianco con testo nero.
+ */
+.library-filter-button.is-active {
+  background:
+    #ffffff;
+
+  color:
+    #000000;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, .18);
 }
 
 
@@ -704,7 +915,7 @@ button {
   fill: none;
 
   stroke:
-    rgba(255, 255, 255, .6);
+    rgba(255, 255, 255, .65);
 
   stroke-width: 2;
 
@@ -720,29 +931,43 @@ button {
   border:
     1px solid rgba(255, 255, 255, .10);
 
-  border-radius: 14px;
+  border-radius:
+    14px;
 
   outline: 0;
 
   background:
-    rgba(0, 0, 0, .34);
+    rgba(0, 0, 0, .42);
 
-  color: #fff;
+  color:
+    #ffffff;
 
-  font-size: 12px;
+  font-size:
+    12px;
+
+  backdrop-filter:
+    blur(14px);
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
 }
 
 #library-search::placeholder {
   color:
-    rgba(255, 255, 255, .42);
+    rgba(255, 255, 255, .45);
 }
 
 #library-search:focus {
   border-color:
-    rgba(18, 217, 83, .38);
+    rgba(73, 209, 125, .55);
 
   background:
-    rgba(0, 0, 0, .45);
+    rgba(0, 0, 0, .54);
+
+  box-shadow:
+    0 0 0 2px rgba(73, 209, 125, .06);
 }
 
 
@@ -756,21 +981,24 @@ button {
 
   min-height: 0;
 
-  overflow-y: auto;
+  overflow-y:
+    auto;
 
   overscroll-behavior:
     contain;
 
-  scrollbar-width: none;
+  scrollbar-width:
+    none;
 }
 
 .audio-list::-webkit-scrollbar {
-  display: none;
+  display:
+    none;
 }
 
 
 /* =========================================================
-   SINGOLO AUDIO
+   AUDIO ITEM
    ========================================================= */
 
 .audio-item {
@@ -790,34 +1018,38 @@ button {
   border:
     1px solid rgba(255, 255, 255, .09);
 
-  border-radius: 15px;
+  border-radius:
+    15px;
 
+  /*
+   * Card più scura per rendere
+   * il testo leggibile sull'arancione.
+   */
   background:
-    rgba(0, 0, 0, .29);
+    rgba(0, 0, 0, .39);
 
-  color: #fff;
+  color:
+    #ffffff;
 
-  text-align: left;
+  text-align:
+    left;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   backdrop-filter:
-    blur(12px);
+    blur(14px);
 
   transition:
     transform .15s ease,
     background .18s ease,
-    border-color .18s ease;
+    border-color .18s ease,
+    box-shadow .18s ease;
 }
 
 .audio-item:active {
   transform:
     scale(.985);
-}
-
-.audio-item:hover {
-  background:
-    rgba(0, 0, 0, .38);
 }
 
 
@@ -827,10 +1059,13 @@ button {
 
 .audio-item.playing-item {
   border-color:
-    rgba(18, 217, 83, .52);
+    rgba(73, 209, 125, .60);
 
   background:
-    rgba(18, 217, 83, .12);
+    rgba(73, 209, 125, .13);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(73, 209, 125, .06);
 }
 
 
@@ -847,24 +1082,30 @@ button {
   width: 42px;
   height: 42px;
 
-  place-items: center;
+  place-items:
+    center;
 
-  border-radius: 50%;
+  border-radius:
+    50%;
 
   background:
     var(--green);
 
-  color: #fff;
+  color:
+    #ffffff;
 
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, .22);
+    0 6px 18px rgba(0, 0, 0, .22),
+
+    0 0 0 1px rgba(73, 209, 125, .18);
 }
 
 .audio-play-icon svg {
   width: 17px;
   height: 17px;
 
-  fill: currentColor;
+  fill:
+    currentColor;
 
   transform:
     translateX(1px);
@@ -887,11 +1128,14 @@ button {
 
   overflow: hidden;
 
-  color: #fff;
+  color:
+    #ffffff;
 
-  font-size: 13px;
+  font-size:
+    13px;
 
-  line-height: 1.3;
+  line-height:
+    1.3;
 
   text-overflow:
     ellipsis;
@@ -903,14 +1147,17 @@ button {
 .audio-meta {
   display: block;
 
-  margin-top: 5px;
+  margin-top:
+    5px;
 
   color:
-    rgba(255, 255, 255, .48);
+    rgba(255, 255, 255, .55);
 
-  font-size: 10px;
+  font-size:
+    10px;
 
-  line-height: 1.2;
+  line-height:
+    1.2;
 }
 
 
@@ -925,19 +1172,26 @@ button {
   border:
     1px solid rgba(255, 255, 255, .08);
 
-  border-radius: 15px;
+  border-radius:
+    15px;
 
   background:
-    rgba(0, 0, 0, .24);
+    rgba(0, 0, 0, .40);
 
   color:
-    rgba(255, 255, 255, .52);
+    rgba(255, 255, 255, .58);
 
-  font-size: 9px;
+  font-size:
+    9px;
 
-  line-height: 1.5;
+  line-height:
+    1.5;
 
-  text-align: center;
+  text-align:
+    center;
+
+  backdrop-filter:
+    blur(14px);
 }
 
 
@@ -963,9 +1217,11 @@ button {
   width:
     calc(100% - 34px);
 
-  max-width: 396px;
+  max-width:
+    396px;
 
-  padding: 5px;
+  padding:
+    5px;
 
   transform:
     translateX(-50%);
@@ -973,7 +1229,8 @@ button {
   border:
     1px solid rgba(255, 255, 255, .09);
 
-  border-radius: 18px;
+  border-radius:
+    18px;
 
   background:
     rgba(0, 0, 0, .84);
@@ -988,26 +1245,32 @@ button {
 
 /* =========================================================
    NAV ITEM
-   SVG + TESTO ALLINEATI
    ========================================================= */
 
 .nav-item {
-  display: flex;
+  display:
+    flex;
 
-  flex-direction: row;
+  flex-direction:
+    row;
 
-  min-height: 48px;
+  min-height:
+    48px;
 
-  align-items: center;
+  align-items:
+    center;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 
   padding:
     0 12px;
 
-  border-radius: 14px;
+  border-radius:
+    14px;
 
   background:
     transparent;
@@ -1015,38 +1278,71 @@ button {
   color:
     rgba(255, 255, 255, .48);
 
-  font-size: 11px;
+  font-size:
+    11px;
 
-  line-height: 1;
+  line-height:
+    1;
 
-  text-align: center;
+  text-align:
+    center;
 
-  white-space: nowrap;
+  white-space:
+    nowrap;
 
-  cursor: pointer;
+  cursor:
+    pointer;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .14s ease;
 }
 
-.nav-item svg {
-  display: block;
+.nav-item:active {
+  transform:
+    scale(.98);
+}
 
-  width: 18px;
-  height: 18px;
+
+/* =========================================================
+   NAV SVG
+   ========================================================= */
+
+.nav-item svg {
+  display:
+    block;
+
+  width:
+    18px;
+
+  height:
+    18px;
 
   flex:
     0 0 18px;
 
-  margin: 0;
-  padding: 0;
+  margin:
+    0;
+
+  padding:
+    0;
 
   fill:
     currentColor;
 
-  vertical-align: middle;
+  vertical-align:
+    middle;
 }
+
+
+/* =========================================================
+   NAV ATTIVA
+   ========================================================= */
 
 .nav-item.is-active {
   background:
-    rgba(18, 217, 83, .14);
+    rgba(73, 209, 125, .14);
 
   color:
     var(--green);
@@ -1060,9 +1356,11 @@ button {
 @media (min-width: 768px) {
 
   body {
-    display: grid;
+    display:
+      grid;
 
-    place-items: center;
+    place-items:
+      center;
   }
 
   #app-shell {
@@ -1070,7 +1368,8 @@ button {
       min(920px,
         calc(100dvh - 32px));
 
-    border-radius: 28px;
+    border-radius:
+      28px;
 
     box-shadow:
       0 30px 90px rgba(0, 0, 0, .52);
@@ -1092,49 +1391,84 @@ button {
       calc(18px + env(safe-area-inset-top));
   }
 
-  .play-area {
-    top: 52%;
-  }
 
   .brand-logo {
-    width: 150px;
+    width:
+      150px;
   }
 
-  /*
-   * Anche su schermi bassi gli switch
-   * rimangono subito sopra la nav.
-   */
+
+  .pulse-stage {
+    width:
+      min(68vw,
+        285px);
+  }
+
+
   .home-switches {
     bottom:
       calc(82px + env(safe-area-inset-bottom));
 
-    gap: 12px;
+    gap:
+      12px;
   }
+
 
   .home-switch-row {
-    gap: 5px;
+    gap:
+      5px;
   }
+
 
   .home-switch-label {
-    font-size: 12px;
+    font-size:
+      12px;
   }
+
 
   .toggle-switch {
-    width: 62px;
-    height: 32px;
+    width:
+      62px;
+
+    height:
+      32px;
   }
+
 
   .toggle-knob {
-    top: 4px;
-    left: 4px;
+    top:
+      4px;
 
-    width: 24px;
-    height: 24px;
+    left:
+      4px;
+
+    width:
+      24px;
+
+    height:
+      24px;
   }
+
 
   .toggle-switch.is-on .toggle-knob {
     transform:
       translateX(30px);
+  }
+
+
+  /*
+   * Alone Library leggermente
+   * più compatto sui display bassi.
+   */
+  #library-screen::before {
+    width:
+      155%;
+
+    height:
+      61%;
+
+    filter:
+      blur(20px);
   }
 }
 
@@ -1147,32 +1481,47 @@ button {
 
   .brand-logo {
     width:
-      min(46vw, 175px);
+      min(46vw,
+        175px);
   }
+
 
   .main-play-button {
     width:
-      clamp(116px, 32vw, 128px);
+      clamp(116px,
+        32vw,
+        128px);
   }
+
 
   .pulse-stage {
     width:
-      min(86vw, 330px);
+      min(70vw,
+        275px);
   }
+
 
   .home-switch-label {
-    font-size: 12px;
+    font-size:
+      12px;
   }
+
 
   .nav-item {
-    gap: 6px;
+    gap:
+      6px;
 
-    font-size: 10px;
+    font-size:
+      10px;
   }
 
+
   .nav-item svg {
-    width: 17px;
-    height: 17px;
+    width:
+      17px;
+
+    height:
+      17px;
 
     flex:
       0 0 17px;
