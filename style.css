@@ -183,6 +183,9 @@ button {
   align-content: center;
 
   min-height: 0;
+
+  /* centra pulsante + onde sulla zona arancione */
+  transform: translateY(4dvh);
 }
 
 
