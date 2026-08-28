@@ -22,7 +22,7 @@
       <div class="login-copy">
         <span class="eyebrow">Area riservata</span>
         <h1>Audio<br>Manager.</h1>
-        <p>Accedi con l'account amministratore Supabase per inserire, ascoltare o cancellare gli audio disponibili nel frontend.</p>
+        <p>Accedi con l'account amministratore Supabase per inserire, modificare, ascoltare o cancellare gli audio disponibili nel frontend.</p>
       </div>
       <form id="login-form" class="stack">
         <label>Email<input id="email" type="email" autocomplete="username" required></label>
@@ -55,25 +55,24 @@
 
       <section class="card upload-card">
         <div class="card-head">
-          <div><span class="eyebrow">Nuovo contenuto</span><h2>Inserisci audio</h2></div>
+          <div><span class="eyebrow">Nuovo contenuto</span><h2>Carica uno o più audio</h2></div>
         </div>
         <form id="upload-form" class="upload-grid">
-          <label class="file-drop">
-            <input id="audio-file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/aac,.mp3,.wav,.ogg,.m4a,.aac" required>
+          <label id="file-drop" class="file-drop">
+            <input id="audio-file" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/aac,.mp3,.wav,.ogg,.m4a,.aac" multiple>
             <span class="upload-icon">＋</span>
-            <span><strong id="file-label">Scegli un file audio</strong><small>MP3, WAV, OGG, M4A o AAC · max 30 MB</small></span>
+            <span>
+              <strong id="file-label">Trascina qui gli audio oppure clicca per sceglierli</strong>
+              <small>MP3, WAV, OGG, M4A o AAC · max 30 MB per file · selezione multipla</small>
+            </span>
           </label>
-          <label>Nome visualizzato<input id="audio-name" placeholder="Es. Coffee break" required maxlength="80"></label>
-          <label>Categoria
-            <select id="audio-safety">
-              <option value="safe">SAFE</option>
-              <option value="unsafe">NOT SAFE</option>
-            </select>
-          </label>
-          <label>Scorciatoia <input id="audio-key" maxlength="1" placeholder="Opzionale"></label>
+
+          <div id="upload-queue" class="upload-queue hidden" aria-live="polite"></div>
+
           <div class="submit-row">
             <p id="upload-message" class="message hidden"></p>
-            <button id="upload-submit" class="primary" type="submit">CARICA AUDIO</button>
+            <button id="upload-clear" class="secondary hidden" type="button">SVUOTA</button>
+            <button id="upload-submit" class="primary" type="submit" disabled>CARICA AUDIO</button>
           </div>
         </form>
       </section>
@@ -90,15 +89,47 @@
             </select>
           </div>
         </div>
+
+        <div class="selection-bar">
+          <label class="selection-toggle">
+            <input id="select-all" type="checkbox">
+            <span>Seleziona tutti</span>
+          </label>
+          <span id="selection-count" class="selection-count">0 selezionati</span>
+          <button id="bulk-delete" class="danger compact" type="button" disabled>ELIMINA SELEZIONATI</button>
+        </div>
+
         <div id="audio-list" class="audio-list"></div>
       </section>
     </section>
   </main>
 
+  <dialog id="edit-dialog">
+    <form id="edit-form" class="dialog-card">
+      <span class="eyebrow">Modifica audio</span>
+      <h2>Modifica informazioni</h2>
+      <div class="edit-fields">
+        <label>Nome visualizzato<input id="edit-name" maxlength="80" required></label>
+        <label>Categoria
+          <select id="edit-safety">
+            <option value="safe">SAFE</option>
+            <option value="unsafe">NOT SAFE</option>
+          </select>
+        </label>
+        <label>Scorciatoia<input id="edit-key" maxlength="1" placeholder="Opzionale"></label>
+      </div>
+      <p id="edit-message" class="message hidden"></p>
+      <div class="dialog-actions">
+        <button id="edit-cancel" class="secondary" type="button">Annulla</button>
+        <button id="edit-save" class="primary" type="submit">SALVA MODIFICHE</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="confirm-dialog">
     <form method="dialog" class="dialog-card">
       <span class="eyebrow">Conferma</span>
-      <h2>Eliminare questo audio?</h2>
+      <h2 id="confirm-title">Eliminare questo audio?</h2>
       <p id="confirm-copy"></p>
       <div class="dialog-actions">
         <button value="cancel" class="secondary">Annulla</button>
